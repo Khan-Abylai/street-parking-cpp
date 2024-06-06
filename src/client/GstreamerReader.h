@@ -7,9 +7,7 @@
 #include <fstream>
 #include <opencv2/opencv.hpp>
 #include <cpr/session.h>
-#include "opencv2/highgui.hpp"
 #include <nlohmann/json.hpp>
-#include <algorithm>
 extern "C" {
 #include <gst/gst.h>
 #include <gst/app/app.h>
@@ -46,7 +44,7 @@ private:
     std::thread backgroundThread;
     std::condition_variable updateCurrentPresetEvent;
     std::mutex updateCurrentPresetMutex;
-    int CHANGE_PRESET_PERIOD = 150;
+    int CHANGE_PRESET_PERIOD = 100;
 
     const int REQUEST_TIMEOUT = 5000;
     const double DURATION_BETWEEN_FRAMES_TH = 1.0;
