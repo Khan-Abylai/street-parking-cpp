@@ -2,8 +2,8 @@
   "camera_ips": "10.66.117.40",
   "username": "admin",
   "password": "campas123.",
-  "calibration": "http://10.66.100.201:8000/events/get_polygon/",
-  "event": "http://10.66.100.201:8000/events/receive_event/",
+  "calibration": "http://10.66.100.113:8000/events/get_polygon/",
+  "event": "http://10.66.100.113:8000/events/receive_event/",
   "detection_threshold": 0.7,
   "recognition_threshold": 0.7
 }

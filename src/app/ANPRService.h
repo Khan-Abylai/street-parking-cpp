@@ -3,7 +3,8 @@
 //
 #pragma once
 #include <utility>
-
+#include <filesystem>
+#include <sys/stat.h>
 #include "../RandomStringGenerator.h"
 #include "../IThreadLauncher.h"
 #include "../ILogger.h"
@@ -62,6 +63,39 @@ private:
         }
 
         return output;
+    }
+
+
+    static bool createDirectoryIfNotExists(const std::string& path) {
+        struct stat info{};
+
+        if (stat(path.c_str(), &info) != 0) {
+            // Directory does not exist, try to create it
+            return std::filesystem::create_directory(path);
+        } else if (info.st_mode & S_IFDIR) {
+            // Directory exists
+            return true;
+        } else {
+            // Path exists but is not a directory
+            return false;
+        }
+    }
+
+    static void saveImage(const cv::Mat& image, const std::string& preset_id, const std::string& event_time, const std::string& ip_address) {
+        std::string folder_path = Constants::IMAGE_DIRECTORY + preset_id;
+        if (createDirectoryIfNotExists(folder_path)) {
+            std::string file_name = event_time + "-" + preset_id + "-" + ip_address + ".jpeg";
+            std::string full_path = folder_path + "/" + file_name;
+
+            // Save the image
+            if (cv::imwrite(full_path, image)) {
+                std::cout << "Image saved successfully at " << full_path << std::endl;
+            } else {
+                std::cerr << "Error saving image at " << full_path << std::endl;
+            }
+        } else {
+            std::cerr << "Error creating directory " << folder_path << std::endl;
+        }
     }
 
     static void saveFrame(const std::shared_ptr<LicensePlate> &plate);

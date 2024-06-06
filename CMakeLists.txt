@@ -29,7 +29,7 @@ if (NOT ONNX_RUNTIME_LIB)
     find_library(ONNX_RUNTIME_LIB onnxruntime HINTS /home/orangepi/onnxruntime/build/Linux/MinSizeRel)
 endif ()
 
-option(DEBUG_LOG "Debug Mode" ON)
+option(DEBUG_LOG "Debug Mode" OFF)
 if (DEBUG_LOG)
     add_definitions(-DDEBUG=1)
 else ()

@@ -8,7 +8,7 @@ namespace Constants {
 
     const std::string UNIDENTIFIED_COUNTRY;
     const std::string JPG_EXTENSION = ".jpg";
-    const std::string IMAGE_DIRECTORY = "/images/";
+    const std::string IMAGE_DIRECTORY = "./images/";
 
 
     const std::string MODEL_FOLDER{"./models/"};

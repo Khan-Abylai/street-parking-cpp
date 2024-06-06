@@ -39,7 +39,6 @@ void ANPRService::run() {
         LOG_INFO("received frame, size:[%d, %d]. preset: %s. overall found plates %d, exec time [%f ms]", frame.cols, frame.rows, frameData->getPresetID().data(),detectionResult.size(), execTime);
 
         if (detectionResult.empty()) continue;
-        bool saveFlag = false;
 
         std::vector<std::string> licensePlateLabels;
         std::vector<std::string> licensePlateBBoxes;
@@ -78,13 +77,9 @@ void ANPRService::run() {
             auto bboxes = convertBoundingBoxToStr(lp);
             licensePlateLabels.emplace_back(licensePlateLabel);
             licensePlateBBoxes.emplace_back(bboxes);
-            if(!saveFlag)
-            {
-                saveFrame(lp);
-                saveFlag = true;
-            }
         }
-
+        if(DEBUG)
+            saveImage(frame, frameData->getPresetID(), Utils::dateTimeToStrAnother(time_t(nullptr)), frameData->getIp());
         if(!licensePlateLabels.empty()){
             createAndPushEventVerification(licensePlateLabels, frameData->getIp(), frameData->getPresetID(), frame, licensePlateBBoxes);
         }
