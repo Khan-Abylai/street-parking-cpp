@@ -1,6 +1,6 @@
 base_image=registry.infra.smartparking.kz/parking_cpp_orangepi_base:1.1
 app_image=registry.infra.smartparking.kz/street-parking
-tag=v1.0.0
+tag=v1.1.0
 
 
 prod:

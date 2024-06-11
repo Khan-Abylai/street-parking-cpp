@@ -11,7 +11,7 @@
 
 class FrameData: public ITimer {
 public:
-    FrameData(std::string ip, std::string presetID, cv::Mat frame, double rtpTimestamp,
+    FrameData(std::string ip, std::string presetID, cv::Mat frame,
               std::chrono::high_resolution_clock::time_point startTime);
 
     const std::string &getPresetID();
@@ -20,7 +20,6 @@ public:
 
     const cv::Mat &getFrame();
 
-    [[nodiscard]] double getRTPtimestamp() const;
 
     [[nodiscard]] float getFrameWidth() const;
 
@@ -29,7 +28,6 @@ public:
 private:
     std::string ip, presetID;
     cv::Mat frame;
-    double rtpTimestamp;
 };
 
 

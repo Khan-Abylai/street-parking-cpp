@@ -10,8 +10,8 @@ using namespace nlohmann;
 
 FrameSnapshotReader::FrameSnapshotReader(const std::string &cameraIP, std::string username,
                                          std::string password,
-                                         const std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>> &frameQueue) :
-        ILogger("Camera " + cameraIP), username{std::move(username)}, password{std::move(password)}, cameraIp{cameraIP} {
+                                         std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>> &frameQueue) :
+        ILogger("Camera " + cameraIP), username{std::move(username)}, password{std::move(password)}, cameraIp{cameraIP}, frameQueue{std::move(frameQueue)} {
     this->getAllPresetsURL = "http://" + cameraIP + this->getAllPresetsURL;
     this->currentTimeUrl = "http://" + cameraIP + this->currentTimeUrl;
     this->snapshotUrl = "http://" + cameraIP + this->snapshotUrl;
@@ -21,6 +21,11 @@ FrameSnapshotReader::FrameSnapshotReader(const std::string &cameraIP, std::strin
     if (!presets.empty()) {
         presetToPresetURL = presets;
         PRESETS_CONFIGURED = true;
+        OVERALL_SECONDS_TO_CHANGE /= (int)presetToPresetURL.size();
+        LOG_INFO("All presets configured, number of presets %d. Interval between checking each preset is %d ",
+                 presetToPresetURL.size(), OVERALL_SECONDS_TO_CHANGE);
+        currentPresetInfo = make_pair(presetToPresetURL.begin()->first, presetToPresetURL.begin()->second);
+        changeToPreset("http://"+cameraIp+currentPresetInfo.second);
     }
 }
 
@@ -74,23 +79,17 @@ bool FrameSnapshotReader::wasRequestSuccessful(const cpr::Response &response) co
 
 void FrameSnapshotReader::launchStream() {
 
-    int CHECK_CURRENT_CAR_SECONDS = 60 / presetToPresetURL.size();
-    pair<string, string> currentPresetInfo = !presetToPresetURL.empty() ? make_pair(presetToPresetURL.begin()->first, presetToPresetURL.begin()->second) : make_pair("", "");
     while (!shutdownFlag) {
         while (PRESETS_CONFIGURED) {
             unique_lock<mutex> lock(shutdownMutex);
-            auto timeout = chrono::seconds(CHECK_CURRENT_CAR_SECONDS);
+            auto timeout = chrono::seconds(OVERALL_SECONDS_TO_CHANGE);
 
             if (!shutdownEvent.wait_for(lock, timeout, [this] { return shutdownFlag.load(); })) {
-                LOG_INFO("Taking snapshots every %d seconds", CHECK_CURRENT_CAR_SECONDS);
-                LOG_INFO("Now we are working with %s preset",currentPresetInfo.first.data());
-
                 auto snapshot = snapshotGetter();
-                LOG_INFO("image with size :%d %d", snapshot.cols, snapshot.rows);
-
-                LOG_INFO("moving to another preset...");
-                auto presetChanged = changeToPreset("http://"+cameraIp + currentPresetInfo.second);
-                LOG_INFO("preset changed %d", presetChanged);
+                auto startTime = chrono::high_resolution_clock::now();
+                frameQueue->push(
+                        make_unique<FrameData>(cameraIp,currentPresetInfo.first,
+                                               std::move(snapshot.clone()), startTime));
 
                 auto it = presetToPresetURL.find(currentPresetInfo.first);
                 if(it!= presetToPresetURL.end()){
@@ -102,6 +101,8 @@ void FrameSnapshotReader::launchStream() {
                 }else{
                     currentPresetInfo = make_pair(presetToPresetURL.begin()->first, presetToPresetURL.begin()->second);
                 }
+                auto presetChanged = changeToPreset("http://"+cameraIp + currentPresetInfo.second);
+                LOG_INFO("Signal for changing preset to the %s sent...", currentPresetInfo.first.data());
             }
         }
     }
@@ -148,10 +149,10 @@ std::map<std::string, std::string> FrameSnapshotReader::getAllPresets() const {
 
 cv::Mat FrameSnapshotReader::snapshotGetter() const {
     cpr::Session session;
-    session.SetUrl(cpr::Url("http://10.66.117.40/LAPI/V1.0/Channels/0/Media/Video/Streams/0/Snapshot"));
+    session.SetUrl(cpr::Url(this->snapshotUrl));
     session.SetVerifySsl(cpr::VerifySsl(false));
-    session.SetTimeout(cpr::Timeout(1000));
-    session.SetAuth(cpr::Authentication("admin","campas123.", cpr::AuthMode::DIGEST));
+    session.SetTimeout(cpr::Timeout(REQUEST_TIMEOUT));
+    session.SetAuth(cpr::Authentication(username,password, cpr::AuthMode::DIGEST));
 
     auto response = session.Get();
     if (response.elapsed >= REQUEST_TIMEOUT / 1000 || response.status_code == 0 || response.status_code == 401) {

@@ -25,7 +25,7 @@ class FrameSnapshotReader:public ILogger {
 
 public:
     FrameSnapshotReader(const std::string &cameraIP, std::string username, std::string password,
-                        const std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>>& frameQueue);
+                        std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>>& frameQueue);
 
     void launchStream();
 
@@ -35,7 +35,7 @@ public:
 
 private:
     const int REQUEST_TIMEOUT = 5000;
-
+    int OVERALL_SECONDS_TO_CHANGE = 120;
     bool PRESETS_CONFIGURED = false;
 
     std::atomic<bool> shutdownFlag = false;
@@ -60,6 +60,7 @@ private:
     bool changeToPreset(const std::string &url);
 
     std::map<std::string, std::string> presetToPresetURL;
+    std::pair<std::string, std::string> currentPresetInfo;
 
 };
 

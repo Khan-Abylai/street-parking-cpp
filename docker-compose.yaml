@@ -2,7 +2,7 @@ services:
   street-parking:
     container_name: streetParking
     command: ./streetParking
-    image: registry.infra.smartparking.kz/street-parking:v1.0.0
+    image: registry.infra.smartparking.kz/street-parking:v1.1.0
     restart: always
     volumes:
       - ./config.json:/app/config.json

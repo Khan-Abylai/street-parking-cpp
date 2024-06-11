@@ -9,11 +9,12 @@
 #include "../IThreadLauncher.h"
 #include "FrameData.h"
 #include "GstreamerReader.h"
+#include "FrameSnapshotReader.h"
 
 class CameraClientLauncher: public IThreadLauncher, public ILogger{
 public:
     CameraClientLauncher(const std::vector<std::string > &cameras,
-                         const std::vector<std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>>> &frameQueues,
+                         std::vector<std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>>> &frameQueues,
                          const std::string &username, const std::string &password);
 
     void run() override;
@@ -22,7 +23,7 @@ public:
 
 protected:
     std::vector<std::thread> threads;
-    std::vector<std::shared_ptr<GstreamerReader>> cameraFrameReaders;
+    std::vector<std::shared_ptr<FrameSnapshotReader>> cameraSnapshotReaders;
 
 };
 
