@@ -17,6 +17,9 @@ double calibrationHeight = 1080;
 std::string username = "admin";
 std::string password = "campas123.";
 
+std::string kafkaTopicName;
+std::string kafkaBrokersList;
+
 string eventEndpoint, calibrationEndpoint;
 
 
@@ -36,9 +39,18 @@ bool Config::parseJson(const std::string &filename) {
         if (configs.find("event") == configs.end())
             throw runtime_error("event sending node not defined");
 
+        if(configs.find("brokers")==configs.end())
+            throw runtime_error("broker list not defined");
+
+        if(configs.find("topic")==configs.end())
+            throw runtime_error("topic name not defined");
+
         cameraVector = Utils::splitString(configs["camera_ips"].get<string>(), ",");
         eventEndpoint = configs["event"].get<string>();
         calibrationEndpoint = configs["calibration"].get<string>();
+
+        kafkaTopicName = configs["topic"].get<string>();
+        kafkaBrokersList = configs["brokers"].get<string>();
 
         if (configs.find("username") != configs.end())
             username = configs["username"].get<string>();
@@ -57,6 +69,7 @@ bool Config::parseJson(const std::string &filename) {
 
         if (configs.find("calibration_width") != configs.end())
             calibrationWidth = configs["calibration_width"].get<double>();
+
 
     } catch (exception &e) {
         cout << "Exception occurred during config parse: " << e.what() << endl;
@@ -100,4 +113,12 @@ double Config::getCalibrationWidth() {
 
 double Config::getCalibrationHeight() {
     return calibrationHeight;
+}
+
+const std::string &Config::getKafkaBrokers() {
+    return kafkaBrokersList;
+}
+
+const std::string &Config::getKafkaTopicName() {
+    return kafkaTopicName;
 }

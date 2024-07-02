@@ -78,8 +78,8 @@ void ANPRService::run() {
             licensePlateLabels.emplace_back(licensePlateLabel);
             licensePlateBBoxes.emplace_back(bboxes);
         }
-        if(DEBUG)
-            saveImage(frame, frameData->getPresetID(), Utils::dateTimeToStrAnother(time_t(nullptr)), frameData->getIp());
+//        if(DEBUG)
+//            saveImage(frame, frameData->getPresetID(), Utils::dateTimeToStrAnother(time_t(nullptr)), frameData->getIp());
         if(!licensePlateLabels.empty()){
             createAndPushEventVerification(licensePlateLabels, frameData->getIp(), frameData->getPresetID(), frame, licensePlateBBoxes);
         }

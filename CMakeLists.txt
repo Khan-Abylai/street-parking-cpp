@@ -8,6 +8,7 @@ find_package(PkgConfig)
 find_package(nlohmann_json REQUIRED)
 find_package(CURL REQUIRED)
 find_package(ncnn REQUIRED)
+find_package(CppKafka REQUIRED)
 
 pkg_check_modules(GST REQUIRED gstreamer-1.0)
 pkg_check_modules(GST_RTP REQUIRED gstreamer-rtp-1.0)
@@ -17,6 +18,7 @@ pkg_check_modules(LIBONNXRUNTIME REQUIRED IMPORTED_TARGET libonnxruntime)
 include_directories(${CURL_INCLUDE_DIR})
 include_directories(${GST_INCLUDE_DIRS} ${GST_APP_INCLUDE_DIRS} ${GST_RTP_INCLUDE_DIRS})
 include_directories(${LIBONNXRUNTIME_INCLUDE_DIRS})
+include_directories(/opt/modern-cpp-kafka/include)
 
 find_path(ONNX_RUNTIME_SESSION_INCLUDE_DIRS onnxruntime_cxx_api.h HINTS /tmp/onnxruntime/include/onnxruntime/core/session/)
 find_library(ONNX_RUNTIME_LIB onnxruntime HINTS /tmp/onnxruntime/build/Linux/MinSizeRel)
@@ -76,8 +78,11 @@ add_executable(streetParking
         src/package_sending/PackageSender.h
         src/package_sending/Package.cpp
         src/package_sending/Package.h
+        src/package_sending/PackageKafkaProducer.cpp
+        src/package_sending/PackageKafkaProducer.h
+        src/package_sending/PackageKafkaProducer.h
 )
 
 target_include_directories(streetParking PRIVATE ${ONNX_RUNTIME_SESSION_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS} ${ncnn_INCLUDE_DIRS})
-target_link_libraries(streetParking PRIVATE ${ONNX_RUNTIME_LIB} ${OpenCV_LIBS} ${GST_LIBRARIES} ${GST_APP_LIBRARIES} ${GST_RTP_LIBRARIES} nlohmann_json::nlohmann_json ${CURL_LIBRARIES} /usr/local/lib/libcpr.so ${ALL_INTERFACE_TARGET} ncnn)
+target_link_libraries(streetParking PRIVATE ${ONNX_RUNTIME_LIB} ${OpenCV_LIBS} ${GST_LIBRARIES} ${GST_APP_LIBRARIES} ${GST_RTP_LIBRARIES} nlohmann_json::nlohmann_json ${CURL_LIBRARIES} /usr/local/lib/libcpr.so ${ALL_INTERFACE_TARGET} ncnn cppkafka RdKafka::rdkafka)
 target_compile_definitions(streetParking PRIVATE $<$<CXX_COMPILER_ID:MSVC>:_SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING>)

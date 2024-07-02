@@ -14,8 +14,10 @@
 #include "app/ANPRService.h"
 #include "package_sending/Package.h"
 #include "package_sending/PackageSender.h"
+#include "package_sending/PackageKafkaProducer.h"
 
 using namespace std;
+
 
 atomic<bool> shutdownFlag = false;
 condition_variable shutdownEvent;
@@ -27,7 +29,6 @@ void signalHandler(int signum) {
     shutdownEvent.notify_all();
 }
 
-
 int main(int argc, char *argv[]) {
 
     signal(SIGINT, signalHandler);
@@ -35,7 +36,6 @@ int main(int argc, char *argv[]) {
     signal(SIGKILL, signalHandler);
     signal(SIGHUP, signalHandler);
     signal(SIGABRT, signalHandler);
-
 
     string configFileName;
 
@@ -47,7 +47,6 @@ int main(int argc, char *argv[]) {
     if (!Config::parseJson(configFileName))
         return -1;
 
-
     vector<shared_ptr<IThreadLauncher>> services;
     auto packageQueue = make_shared<SharedQueue<shared_ptr<Package>>>();
     vector<shared_ptr<SharedQueue<unique_ptr<FrameData>>>> frameQueues;
@@ -56,7 +55,8 @@ int main(int argc, char *argv[]) {
 
     for (const auto &camera: cameras) {
         auto frameQueue = make_shared<SharedQueue<unique_ptr<FrameData>>>();
-        auto anprService = make_shared<ANPRService>(frameQueue, packageQueue, camera, Config::getCalibrationEndPoint(), Config::getCalibrationWidth(), Config::getCalibrationHeight());
+        auto anprService = make_shared<ANPRService>(frameQueue, packageQueue, camera, Config::getCalibrationEndPoint(),
+                                                    Config::getCalibrationWidth(), Config::getCalibrationHeight());
         frameQueues.push_back(std::move(frameQueue));
         services.emplace_back(anprService);
     }
@@ -66,10 +66,13 @@ int main(int argc, char *argv[]) {
                                                       Config::getUsername(), Config::getPassword());
     services.emplace_back(clientStarter);
 
+//    auto packageSender = make_shared<PackageSender>(packageQueue, Config::getEventEndpoint());
+//    services.emplace_back(packageSender);
 
+    auto kafkaPackageProducer = make_shared<PackageKafkaProducer>(packageQueue, Config::getKafkaBrokers(),
+                                                                  Config::getKafkaTopicName());
+    services.emplace_back(kafkaPackageProducer);
 
-    auto packageSender = make_shared<PackageSender>(packageQueue, Config::getEventEndpoint());
-    services.emplace_back(packageSender);
 
     vector<thread> threads;
     for (const auto &service: services) {
@@ -89,6 +92,6 @@ int main(int argc, char *argv[]) {
         if (threads[i].joinable())
             threads[i].join();
     }
-
     return 0;
+
 }

@@ -33,6 +33,10 @@ public:
     static const std::string &getCalibrationEndPoint();
 
     static const std::string &getEventEndpoint();
+
+    static const std::string &getKafkaBrokers();
+
+    static const std::string &getKafkaTopicName();
 };
 
 

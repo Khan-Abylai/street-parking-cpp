@@ -1,4 +1,4 @@
-FROM registry.infra.smartparking.kz/parking_cpp_orangepi_base:1.1
+FROM registry.infra.smartparking.kz/parking_cpp_orangepi_base:2.0
 
 RUN mkdir -p /app
 WORKDIR /app
@@ -9,7 +9,7 @@ COPY CMakeLists.txt .
 RUN mkdir build && \
     cd build && \
     cmake .. && \
-    make && \
+    make -j8 && \
     mv streetParking ../ && \
     cd .. && \
     rm -rf src/ build/ CMakeLists.txt
