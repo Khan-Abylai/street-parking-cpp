@@ -10,16 +10,20 @@
 #include "../ILogger.h"
 #include "../SharedQueue.h"
 #include "../client/FrameData.h"
-#include "DetectorYoloV5NCNN.h"
-#include "LPRecognizerNCNN.h"
 #include "CalibrationParams.h"
 #include "CalibrationParamsUpdater.h"
 #include "../package_sending/Package.h"
+#include "../app/Detection.h"
+#include "../app/LPRecognizer.h"
+#include "../app/TemplateMatching.h"
+#include "../app/Detection.h"
 
 class ANPRService: public IThreadLauncher, public ILogger{
 public:
     ANPRService(std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>> frameQueue,
-                std::shared_ptr<SharedQueue<std::shared_ptr<Package>>> packageQueue, std::string cameraIp,
+                std::shared_ptr<SharedQueue<std::shared_ptr<Package>>> packageQueue,
+                std::shared_ptr<Detection> detection,
+                std::string cameraIp,
                 const std::string& nodeIp, float calibrationWidth, float calibrationHeight);
 
     void run() override;
@@ -29,8 +33,8 @@ private:
     const float RECOGNIZER_PROB_THRESHOLD = 0.70;
 
     std::string cameraIP;
-    std::unique_ptr<DetectorYoloV5NCNN> detectionNCNN;
-    std::unique_ptr<LPRecognizerNCNN> recognizerNCNN;
+    std::shared_ptr<Detection> detection;
+    std::unique_ptr<LPRecognizer> recognizer;
     std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>> frameQueue;
     std::unique_ptr<TemplateMatching> templateMatching;
     std::shared_ptr<SharedQueue<std::shared_ptr<Package>>> packageQueue;

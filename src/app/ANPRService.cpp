@@ -9,10 +9,10 @@ using namespace std;
 
 ANPRService::ANPRService(std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>> frameQueue,
                          std::shared_ptr<SharedQueue<std::shared_ptr<Package>>> packageQueue,
-                         std::string cameraIp, const std::string& nodeIp, float calibrationWidth, float calibrationHeight) : ILogger("ANPR Service"), frameQueue{std::move(frameQueue)},packageQueue{std::move(packageQueue)}, cameraIP{std::move(cameraIp)}{
+                         std::shared_ptr<Detection> detection,
+                         std::string cameraIp, const std::string& nodeIp, float calibrationWidth, float calibrationHeight) : ILogger("ANPR Service"), detection{std::move(detection)}, frameQueue{std::move(frameQueue)},packageQueue{std::move(packageQueue)}, cameraIP{std::move(cameraIp)}{
     LOG_INFO("Initialize Detection Service for camera %s", cameraIP.data());
-    this->detectionNCNN = make_unique<DetectorYoloV5NCNN>();
-    this->recognizerNCNN = make_unique<LPRecognizerNCNN>();
+    this->recognizer = make_unique<LPRecognizer>();
     this->templateMatching = make_unique<TemplateMatching>();
 
     calibParams = make_shared<CalibrationParams>(nodeIp, cameraIP, calibrationWidth, calibrationHeight);
@@ -33,7 +33,7 @@ void ANPRService::run() {
         auto frame = frameData->getFrame();
 
         auto startTime = chrono::high_resolution_clock::now();
-        auto detectionResult = detectionNCNN->detect(frame);
+        auto detectionResult = detection->detect(frame);
         auto endTime = chrono::high_resolution_clock::now();
         double execTime = (double) chrono::duration_cast<chrono::milliseconds>(endTime - startTime).count();
         LOG_INFO("received frame, size:[%d, %d]. preset: %s. overall found plates %d, exec time [%f ms]", frame.cols, frame.rows, frameData->getPresetID().data(),detectionResult.size(), execTime);
@@ -51,7 +51,7 @@ void ANPRService::run() {
 
             vector<cv::Mat> lpImages = getLicensePlateImages(lp);
             auto rec_startTime = chrono::high_resolution_clock::now();
-            auto recognizerResult = recognizerNCNN->predict(lpImages);
+            auto recognizerResult = recognizer->predict(lpImages);
             auto rec_endTime = chrono::high_resolution_clock::now();
             double rec_execTime = (double) chrono::duration_cast<chrono::milliseconds>(rec_endTime - rec_startTime).count();
             auto [licensePlateLabel, probability] = getLicensePlateLabel(recognizerResult, lp->isSquare());
@@ -60,7 +60,7 @@ void ANPRService::run() {
             if(!isValid && lp->isSquare()){
                 lp->setFakePlateImage(frame.clone());
                 vector<cv::Mat> fakeLPImages = {lp->getFakePlateImage()};
-                auto fakeRecognizerResult = recognizerNCNN->predict(fakeLPImages);
+                auto fakeRecognizerResult = recognizer->predict(fakeLPImages);
                 auto [fakeLabel, fakeProb] = getLicensePlateLabel(fakeRecognizerResult, false);
                 bool newIsValid = isValidLicensePlate(fakeLabel, fakeProb);
                 if(!newIsValid)
@@ -98,7 +98,7 @@ std::vector<cv::Mat> ANPRService::getLicensePlateImages(const shared_ptr<License
     return lpImages;}
 
 cv::Mat ANPRService::combineInOneLineSquareLpPlate(const cv::Mat &lpImage) {
-    auto blackImage = cv::Mat(Constants::RECT_LP_H, Constants::BLACK_IMG_WIDTH, CV_8UC3, cv::Scalar(0, 0, 0));
+    auto blackImage = cv::Mat(Constants::STANDARD_RECT_LP_H, Constants::BLACK_IMG_WIDTH, CV_8UC3, cv::Scalar(0, 0, 0));
     auto topHalf = lpImage(cv::Rect(0, 0, Constants::SQUARE_LP_W, Constants::SQUARE_LP_H / 2));
     auto bottomHalf = lpImage(
             cv::Rect(0, Constants::SQUARE_LP_H / 2, Constants::SQUARE_LP_W, Constants::SQUARE_LP_H / 2));

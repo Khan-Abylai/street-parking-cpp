@@ -35,7 +35,7 @@ void LicensePlate::setFakePlateImage(const cv::Mat &frame) {
             leftTop, leftBottom, rightTop, rightBottom
     }, Constants::RECT_LP_COORS);
 
-    lpSize = cv::Size(Constants::RECT_LP_W, Constants::RECT_LP_H);
+    lpSize = cv::Size(Constants::STANDARD_RECT_LP_W, Constants::STANDARD_RECT_LP_H);
     cv::warpPerspective(frame, fakePlateImage, transformationMatrix, lpSize);
 }
 
@@ -58,7 +58,7 @@ void LicensePlate::setPlateImage(const cv::Mat &frame) {
                 leftTop, leftBottom, rightTop, rightBottom
         }, Constants::RECT_LP_COORS);
 
-        lpSize = cv::Size(Constants::RECT_LP_W, Constants::RECT_LP_H);
+        lpSize = cv::Size(Constants::STANDARD_RECT_LP_W, Constants::STANDARD_RECT_LP_H);
     }
     cv::warpPerspective(frame, plateImage, transformationMatrix, lpSize);
 

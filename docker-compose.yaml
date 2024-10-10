@@ -1,13 +1,17 @@
 services:
-  street-parking:
+  cpp-app:
     container_name: streetParking
     command: ./streetParking
-    image: registry.infra.smartparking.kz/street-parking:v1.1.0
+    environment:
+      - TZ=Asia/Almaty
+      - NVIDIA_VISIBLE_DEVICES=0
+      - CUDA_MODULE_LOADING=LAZY
+    image: registry.infra.smartparking.kz/cpp-trt8:v2.1.0
     restart: always
+    runtime: nvidia
     volumes:
       - ./config.json:/app/config.json
-      - ./images:/app/images
     logging:
       options:
         max-size: 50m
-version: '2.1'
+version: '2.3'

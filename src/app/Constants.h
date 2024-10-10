@@ -5,23 +5,21 @@
 #include <opencv2/opencv.hpp>
 
 namespace Constants {
+    enum class CountryCode {
+        KZ,
+        KG,
+        UZ,
+        RU,
+        BY,
+        GE,
+        AM,
+        AZ
+    };
 
     const std::string UNIDENTIFIED_COUNTRY;
     const std::string JPG_EXTENSION = ".jpg";
     const std::string IMAGE_DIRECTORY = "./images/";
-
-
     const std::string MODEL_FOLDER{"./models/"};
-
-    const std::string detectorModelFilepath{MODEL_FOLDER + "detector.onnx"};
-    const std::string detectorMobilenetModelFilepath{MODEL_FOLDER + "plate_new.onnx"};
-    const std::string recognizerModelFilepath{MODEL_FOLDER + "recognizer.onnx"};
-
-    const std::string detBin{MODEL_FOLDER + "yolov5-car-plate.bin"};
-    const std::string detParam{MODEL_FOLDER + "yolov5-car-plate.param"};
-
-    const std::string recognizerBin{MODEL_FOLDER + "crnn-lite-sim.bin"};
-    const std::string recognizerParam{MODEL_FOLDER + "crnn-lite-sim.param"};
 
     static const int BLACK_IMG_WIDTH = 12;
 
@@ -35,16 +33,27 @@ namespace Constants {
     const float confThreshold = 0.8f;
     const float iouThreshold = 0.4f;
 
-    const int RECT_LP_H = 32;
-    const int RECT_LP_W = 128;
+    const int STANDARD_RECT_LP_H = 32;
+    const int STANDARD_RECT_LP_W = 128;
+
+    const int EXTENDED_RECT_LP_H = 64;
+    const int EXTENDED_RECT_LP_W = 160;
 
     const int SQUARE_LP_H = 64;
     const int SQUARE_LP_W = 64;
 
-    const int RECOGNIZER_MAX_BATCH_SIZE = 4;
+    const int RECOGNIZER_MAX_BATCH_SIZE = 1;
+
+    const int STANDARD_SEQUENCE_SIZE = 30;
+    const int STANDARD_ALPHABET_SIZE = 38;
+    const std::string STANDARD_ALPHABET = "-0123456789abcdefghijklmnopqrstuvwxyz.";
+
+    const int EXTENDED_SEQUENCE_SIZE = 38;
+    const int EXTENDED_ALPHABET_SIZE = 37;
+    const std::string EXTENDED_ALPHABET = "-0123456789abcdefghijklmnopqrstuvwxyz";
+
 
     constexpr float PIXEL_MAX_VALUE = 255;
-
 
     const int LP_WHITENESS_MAX = 200;
     const int LP_WHITENESS_MIN = 90;

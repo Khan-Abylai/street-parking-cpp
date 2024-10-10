@@ -14,7 +14,7 @@
 #include "app/ANPRService.h"
 #include "package_sending/Package.h"
 #include "package_sending/PackageSender.h"
-#include "package_sending/PackageKafkaProducer.h"
+#include "app/DetectionEngine.h"
 
 using namespace std;
 
@@ -52,10 +52,11 @@ int main(int argc, char *argv[]) {
     vector<shared_ptr<SharedQueue<unique_ptr<FrameData>>>> frameQueues;
 
     auto cameras = Config::getCameras();
+    auto detectionEngine = make_shared<DetectionEngine>();
 
     for (const auto &camera: cameras) {
         auto frameQueue = make_shared<SharedQueue<unique_ptr<FrameData>>>();
-        auto anprService = make_shared<ANPRService>(frameQueue, packageQueue, camera, Config::getCalibrationEndPoint(),
+        auto anprService = make_shared<ANPRService>(frameQueue, packageQueue, make_shared<Detection>(detectionEngine->createExecutionContext(), Config::getDetectorThreshold()), camera, Config::getCalibrationEndPoint(),
                                                     Config::getCalibrationWidth(), Config::getCalibrationHeight());
         frameQueues.push_back(std::move(frameQueue));
         services.emplace_back(anprService);
@@ -66,12 +67,8 @@ int main(int argc, char *argv[]) {
                                                       Config::getUsername(), Config::getPassword());
     services.emplace_back(clientStarter);
 
-//    auto packageSender = make_shared<PackageSender>(packageQueue, Config::getEventEndpoint());
-//    services.emplace_back(packageSender);
-
-    auto kafkaPackageProducer = make_shared<PackageKafkaProducer>(packageQueue, Config::getKafkaBrokers(),
-                                                                  Config::getKafkaTopicName());
-    services.emplace_back(kafkaPackageProducer);
+    auto packageSender = make_shared<PackageSender>(packageQueue, Config::getEventEndpoint());
+    services.emplace_back(packageSender);
 
 
     vector<thread> threads;
