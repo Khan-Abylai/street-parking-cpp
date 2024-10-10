@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
     string configFileName;
 
     if (argc <= 1)
-        configFileName = "../config.json";
+        configFileName = "config.json";
     else
         configFileName = argv[1];
 
