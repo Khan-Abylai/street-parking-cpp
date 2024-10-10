@@ -1,6 +1,6 @@
 image_base=registry.infra.smartparking.kz/cpp-base:1.0
-image=registry.infra.smartparking.kz/cpp-trt8
-tag=v2.1.1
+image=registry.infra.smartparking.kz/street-cpp-trt8
+tag=v1.0.0
 dev_tag=dev
 engine_builder_tag=${tag}-engine
 container_name=test

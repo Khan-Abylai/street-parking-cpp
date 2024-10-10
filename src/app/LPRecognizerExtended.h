@@ -40,7 +40,7 @@ private:
             IMG_CHANNELS = Constants::IMG_CHANNELS,
             INPUT_SIZE = IMG_CHANNELS * IMG_HEIGHT * IMG_WIDTH,
             OUTPUT_SIZE = SEQUENCE_SIZE * ALPHABET_SIZE,
-            REGION_SIZE = 13,
+            REGION_SIZE = 37,
             OUTPUT_2_SIZE = REGION_SIZE,
             MAX_BATCH_SIZE = Constants::RECOGNIZER_MAX_BATCH_SIZE,
             MAX_PLATE_SIZE = 12;
@@ -50,15 +50,22 @@ private:
             NETWORK_DIM_NAME = "DIMENSIONS",
             NETWORK_OUTPUT_NAME = "OUTPUT",
             NETWORK_OUTPUT_2_NAME = "OUTPUT_2",
-            ENGINE_NAME = "recognizer_mena_iter6_26_08.engine",
-            WEIGHTS_FILENAME = "recognizer_mena_iter6_26.08.np";
+            ENGINE_NAME = "recognizer_eur_marocco.engine",
+            WEIGHTS_FILENAME = "recognizer_eur_marocco.np";
     std::vector<int> dimensions;
 
     void createEngine();
 
 
-    std::vector<std::string> REGIONS{"dubai", "abu-dhabi", "sharjah", "ajman", "ras-al-khaimah", "fujairah",
-                                     "alquwain", "bahrein", "oman", "saudi", "quatar", "kuwait", "others"};
+    // std::vector<std::string> REGIONS{"dubai", "abu-dhabi", "sharjah", "ajman", "ras-al-khaimah", "fujairah",
+    //                                  "alquwain", "bahrein", "oman", "saudi", "quatar", "kuwait", "others"};
+
+    std::vector<std::string> REGIONS{"albania", "andorra", "austria", "belgium", "bosnia", "bulgaria", "croatia", "cyprus", "czech", "estonia",
+                                     "finland", "france", "germany", "greece", "hungary", "ireland", "italy", "latvia",
+                                     "licht", "lithuania", "luxemburg", "makedonia", "malta", "monaco", "montenegro", "netherlands", "poland",
+                                     "portugal", "romania", "san_marino", "serbia", "slovakia", "slovenia", "spain", "sweden", "swiss", "marocco"};
+
+
 
     std::pair<std::vector<float>, std::vector<float>> executeInferEngine(const std::vector<cv::Mat> &frames);
 

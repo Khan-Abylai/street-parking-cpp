@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 
     for (const auto &camera: cameras) {
         auto frameQueue = make_shared<SharedQueue<unique_ptr<FrameData>>>();
-        auto anprService = make_shared<ANPRService>(frameQueue, packageQueue, make_shared<Detection>(detectionEngine->createExecutionContext(), Config::getDetectorThreshold()), camera, Config::getCalibrationEndPoint(),
+        auto anprService = make_shared<ANPRService>(frameQueue, packageQueue, make_shared<Detection>(detectionEngine->createExecutionContext(), Config::getDetectorThreshold()), Config::getRecognizerThreshold(), camera, Config::getCalibrationEndPoint(),
                                                     Config::getCalibrationWidth(), Config::getCalibrationHeight());
         frameQueues.push_back(std::move(frameQueue));
         services.emplace_back(anprService);

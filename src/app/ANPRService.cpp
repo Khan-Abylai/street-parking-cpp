@@ -4,15 +4,16 @@
 
 #include "ANPRService.h"
 
-
 using namespace std;
 
 ANPRService::ANPRService(std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>> frameQueue,
                          std::shared_ptr<SharedQueue<std::shared_ptr<Package>>> packageQueue,
                          std::shared_ptr<Detection> detection,
-                         std::string cameraIp, const std::string& nodeIp, float calibrationWidth, float calibrationHeight) : ILogger("ANPR Service"), detection{std::move(detection)}, frameQueue{std::move(frameQueue)},packageQueue{std::move(packageQueue)}, cameraIP{std::move(cameraIp)}{
+                         const float &recognizerThreshold,
+                         std::string cameraIp, const std::string& nodeIp, float calibrationWidth, float calibrationHeight) : ILogger("ANPR Service"), detection{std::move(detection)}, RECOGNIZER_PROB_THRESHOLD{recognizerThreshold}, frameQueue{std::move(frameQueue)},packageQueue{std::move(packageQueue)}, cameraIP{std::move(cameraIp)}{
     LOG_INFO("Initialize Detection Service for camera %s", cameraIP.data());
-    this->recognizer = make_unique<LPRecognizer>();
+    // this->recognizer = make_unique<LPRecognizer>();
+    this->recognizer_ext = make_unique<LPRecognizerExtended>();
     this->templateMatching = make_unique<TemplateMatching>();
 
     calibParams = make_shared<CalibrationParams>(nodeIp, cameraIP, calibrationWidth, calibrationHeight);
@@ -51,17 +52,24 @@ void ANPRService::run() {
 
             vector<cv::Mat> lpImages = getLicensePlateImages(lp);
             auto rec_startTime = chrono::high_resolution_clock::now();
-            auto recognizerResult = recognizer->predict(lpImages);
+            // auto recognizerResult = recognizer->predict(lpImages);
+            auto recognizerResult = recognizer_ext->makePrediction(lpImages);
+            vector<std::pair<std::string, float>> lp_vector;
+            lp_vector.emplace_back(make_pair(std::get<0>(recognizerResult), std::get<1>(recognizerResult)));
             auto rec_endTime = chrono::high_resolution_clock::now();
             double rec_execTime = (double) chrono::duration_cast<chrono::milliseconds>(rec_endTime - rec_startTime).count();
-            auto [licensePlateLabel, probability] = getLicensePlateLabel(recognizerResult, lp->isSquare());
+            auto [licensePlateLabel, probability] = getLicensePlateLabel(lp_vector, lp->isSquare());
             bool isValid = isValidLicensePlate(licensePlateLabel, probability);
 
             if(!isValid && lp->isSquare()){
                 lp->setFakePlateImage(frame.clone());
                 vector<cv::Mat> fakeLPImages = {lp->getFakePlateImage()};
-                auto fakeRecognizerResult = recognizer->predict(fakeLPImages);
-                auto [fakeLabel, fakeProb] = getLicensePlateLabel(fakeRecognizerResult, false);
+                // auto fakeRecognizerResult = recognizer->predict(fakeLPImages);
+                auto fakeRecognizerResult = recognizer_ext->makePrediction(lpImages);
+
+                vector<std::pair<std::string, float>> fake_lp_vector;
+                fake_lp_vector.emplace_back(make_pair(std::get<0>(recognizerResult), std::get<1>(recognizerResult)));
+                auto [fakeLabel, fakeProb] = getLicensePlateLabel(fake_lp_vector, false);
                 bool newIsValid = isValidLicensePlate(fakeLabel, fakeProb);
                 if(!newIsValid)
                     continue;
@@ -79,7 +87,7 @@ void ANPRService::run() {
             licensePlateBBoxes.emplace_back(bboxes);
         }
 //        if(DEBUG)
-//            saveImage(frame, frameData->getPresetID(), Utils::dateTimeToStrAnother(time_t(nullptr)), frameData->getIp());
+            // saveImage(frame, "1", Utils::dateTimeToStrAnother(time_t(nullptr)), frameData->getIp());
         if(!licensePlateLabels.empty()){
             createAndPushEventVerification(licensePlateLabels, frameData->getIp(), frame, licensePlateBBoxes);
         }
@@ -98,13 +106,13 @@ std::vector<cv::Mat> ANPRService::getLicensePlateImages(const shared_ptr<License
     return lpImages;}
 
 cv::Mat ANPRService::combineInOneLineSquareLpPlate(const cv::Mat &lpImage) {
-    auto blackImage = cv::Mat(Constants::STANDARD_RECT_LP_H, Constants::BLACK_IMG_WIDTH, CV_8UC3, cv::Scalar(0, 0, 0));
+    // auto blackImage = cv::Mat(Constants::STANDARD_RECT_LP_H, Constants::BLACK_IMG_WIDTH, CV_8UC3, cv::Scalar(0, 0, 0));
     auto topHalf = lpImage(cv::Rect(0, 0, Constants::SQUARE_LP_W, Constants::SQUARE_LP_H / 2));
     auto bottomHalf = lpImage(
             cv::Rect(0, Constants::SQUARE_LP_H / 2, Constants::SQUARE_LP_W, Constants::SQUARE_LP_H / 2));
 
     cv::Mat combinedPlateImage;
-    cv::hconcat(topHalf, blackImage, topHalf);
+    // cv::hconcat(topHalf, blackImage, topHalf);
     cv::hconcat(topHalf, bottomHalf, combinedPlateImage);
     return combinedPlateImage;}
 
@@ -138,7 +146,8 @@ void ANPRService::saveFrame(const shared_ptr<LicensePlate> &plate) {
 bool ANPRService::isValidLicensePlate(const string &lpLabel, float probability) {
     auto plateCountry = templateMatching->getCountryCode(lpLabel);
     auto isTemplateMatched = plateCountry != Constants::UNIDENTIFIED_COUNTRY;
-    return probability > RECOGNIZER_PROB_THRESHOLD && isTemplateMatched;}
+    return probability > RECOGNIZER_PROB_THRESHOLD; //&& isTemplateMatched;
+}
 
 void
 ANPRService::createAndPushEventVerification(const std::vector<std::string>& licensePlateLabels, const string &cameraIp,

@@ -49,8 +49,8 @@ namespace Constants {
     const std::string STANDARD_ALPHABET = "-0123456789abcdefghijklmnopqrstuvwxyz.";
 
     const int EXTENDED_SEQUENCE_SIZE = 38;
-    const int EXTENDED_ALPHABET_SIZE = 37;
-    const std::string EXTENDED_ALPHABET = "-0123456789abcdefghijklmnopqrstuvwxyz";
+    const int EXTENDED_ALPHABET_SIZE = 46;
+    const std::string EXTENDED_ALPHABET = "-0123456789abcdefghijklmnopqrstuvwxyz@&!?%^#$|";
 
 
     constexpr float PIXEL_MAX_VALUE = 255;

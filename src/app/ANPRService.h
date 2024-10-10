@@ -14,15 +14,16 @@
 #include "CalibrationParamsUpdater.h"
 #include "../package_sending/Package.h"
 #include "../app/Detection.h"
-#include "../app/LPRecognizer.h"
 #include "../app/TemplateMatching.h"
-#include "../app/Detection.h"
+#include "../app/LPRecognizer.h"
+#include "../app/LPRecognizerExtended.h"
 
 class ANPRService: public IThreadLauncher, public ILogger{
 public:
     ANPRService(std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>> frameQueue,
                 std::shared_ptr<SharedQueue<std::shared_ptr<Package>>> packageQueue,
                 std::shared_ptr<Detection> detection,
+                const float &recognizerThreshold,
                 std::string cameraIp,
                 const std::string& nodeIp, float calibrationWidth, float calibrationHeight);
 
@@ -30,11 +31,12 @@ public:
 
     void shutdown() override;
 private:
-    const float RECOGNIZER_PROB_THRESHOLD = 0.70;
+    const float RECOGNIZER_PROB_THRESHOLD = 0.5;
 
     std::string cameraIP;
     std::shared_ptr<Detection> detection;
-    std::unique_ptr<LPRecognizer> recognizer;
+    // std::unique_ptr<LPRecognizer> recognizer;
+    std::unique_ptr<LPRecognizerExtended> recognizer_ext;
     std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>> frameQueue;
     std::unique_ptr<TemplateMatching> templateMatching;
     std::shared_ptr<SharedQueue<std::shared_ptr<Package>>> packageQueue;

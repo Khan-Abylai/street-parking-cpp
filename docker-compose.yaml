@@ -6,7 +6,7 @@ services:
       - TZ=Asia/Almaty
       - NVIDIA_VISIBLE_DEVICES=0
       - CUDA_MODULE_LOADING=LAZY
-    image: registry.infra.smartparking.kz/cpp-trt8:v2.1.0
+    image: registry.infra.smartparking.kz/street-cpp-trt8:v1.0.0
     restart: always
     runtime: nvidia
     volumes:
