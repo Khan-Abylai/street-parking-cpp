@@ -25,7 +25,7 @@ class FrameSnapshotReader:public ILogger {
 
 public:
     FrameSnapshotReader(const std::string &cameraIP, std::string username, std::string password,
-                        std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>>& frameQueue);
+                        std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>>& frameQueue, int eventInterval);
 
     void launchStream();
 
@@ -35,7 +35,7 @@ public:
 
 private:
     const int REQUEST_TIMEOUT = 5000;
-    int OVERALL_SECONDS_TO_CHANGE = 10;
+    int OVERALL_SECONDS_TO_CHANGE = 60;
     bool PRESETS_CONFIGURED = false;
 
     std::atomic<bool> shutdownFlag = false;

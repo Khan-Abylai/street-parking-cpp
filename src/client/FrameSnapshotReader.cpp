@@ -10,8 +10,8 @@ using namespace nlohmann;
 
 FrameSnapshotReader::FrameSnapshotReader(const std::string &cameraIP, std::string username,
                                          std::string password,
-                                         std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>> &frameQueue) :
-        ILogger("Camera " + cameraIP), username{std::move(username)}, password{std::move(password)}, cameraIp{cameraIP}, frameQueue{std::move(frameQueue)} {
+                                         std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>> &frameQueue, int eventInterval) :
+        ILogger("Camera " + cameraIP), username{std::move(username)}, password{std::move(password)}, cameraIp{cameraIP}, frameQueue{std::move(frameQueue)}, OVERALL_SECONDS_TO_CHANGE{eventInterval} {
     this->currentTimeUrl = "http://" + cameraIP + this->currentTimeUrl;
     this->snapshotUrl = "http://" + cameraIP + this->snapshotUrl;
 

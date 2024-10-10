@@ -21,7 +21,7 @@ std::string kafkaTopicName;
 std::string kafkaBrokersList;
 
 string eventEndpoint, calibrationEndpoint;
-
+int eventInterval;
 
 bool Config::parseJson(const std::string &filename) {
     try {
@@ -70,6 +70,9 @@ bool Config::parseJson(const std::string &filename) {
         if (configs.find("calibration_width") != configs.end())
             calibrationWidth = configs["calibration_width"].get<double>();
 
+        if (configs.find("event_interval_in_seconds") != configs.end())
+            eventInterval = configs["event_interval_in_seconds"].get<int>();
+
 
     } catch (exception &e) {
         cout << "Exception occurred during config parse: " << e.what() << endl;
@@ -105,6 +108,10 @@ const std::string &Config::getCalibrationEndPoint() {
 
 const std::string &Config::getEventEndpoint() {
     return eventEndpoint;
+}
+
+const int &Config::getEventInterval() {
+    return eventInterval;
 }
 
 double Config::getCalibrationWidth() {

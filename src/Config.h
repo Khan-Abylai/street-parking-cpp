@@ -34,6 +34,8 @@ public:
 
     static const std::string &getEventEndpoint();
 
+    static const int &getEventInterval();
+
     static const std::string &getKafkaBrokers();
 
     static const std::string &getKafkaTopicName();

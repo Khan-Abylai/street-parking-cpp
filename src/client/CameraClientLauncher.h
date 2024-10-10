@@ -14,7 +14,7 @@ class CameraClientLauncher: public IThreadLauncher, public ILogger{
 public:
     CameraClientLauncher(const std::vector<std::string > &cameras,
                          std::vector<std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>>> &frameQueues,
-                         const std::string &username, const std::string &password);
+                         const std::string &username, const std::string &password, int eventInterval);
 
     void run() override;
 

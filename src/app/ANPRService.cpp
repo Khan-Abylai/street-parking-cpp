@@ -10,7 +10,9 @@ ANPRService::ANPRService(std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>
                          std::shared_ptr<SharedQueue<std::shared_ptr<Package>>> packageQueue,
                          std::shared_ptr<Detection> detection,
                          const float &recognizerThreshold,
-                         std::string cameraIp, const std::string& nodeIp, float calibrationWidth, float calibrationHeight) : ILogger("ANPR Service"), detection{std::move(detection)}, RECOGNIZER_PROB_THRESHOLD{recognizerThreshold}, frameQueue{std::move(frameQueue)},packageQueue{std::move(packageQueue)}, cameraIP{std::move(cameraIp)}{
+                         std::string cameraIp, const std::string& nodeIp, float calibrationWidth, float calibrationHeight) : ILogger("ANPR Service"),
+                         detection{std::move(detection)}, RECOGNIZER_PROB_THRESHOLD{recognizerThreshold}, frameQueue{std::move(frameQueue)},
+                          packageQueue{std::move(packageQueue)}, cameraIP{std::move(cameraIp)} {
     LOG_INFO("Initialize Detection Service for camera %s", cameraIP.data());
     // this->recognizer = make_unique<LPRecognizer>();
     this->recognizer_ext = make_unique<LPRecognizerExtended>();

@@ -56,7 +56,8 @@ int main(int argc, char *argv[]) {
 
     for (const auto &camera: cameras) {
         auto frameQueue = make_shared<SharedQueue<unique_ptr<FrameData>>>();
-        auto anprService = make_shared<ANPRService>(frameQueue, packageQueue, make_shared<Detection>(detectionEngine->createExecutionContext(), Config::getDetectorThreshold()), Config::getRecognizerThreshold(), camera, Config::getCalibrationEndPoint(),
+        auto anprService = make_shared<ANPRService>(frameQueue, packageQueue, make_shared<Detection>(detectionEngine->createExecutionContext(), Config::getDetectorThreshold()),
+                                                    Config::getRecognizerThreshold(), camera, Config::getCalibrationEndPoint(),
                                                     Config::getCalibrationWidth(), Config::getCalibrationHeight());
         frameQueues.push_back(std::move(frameQueue));
         services.emplace_back(anprService);
@@ -64,7 +65,7 @@ int main(int argc, char *argv[]) {
 
     shared_ptr<IThreadLauncher> clientStarter;
     clientStarter = make_shared<CameraClientLauncher>(cameras, frameQueues,
-                                                      Config::getUsername(), Config::getPassword());
+                                                      Config::getUsername(), Config::getPassword(), Config::getEventInterval());
     services.emplace_back(clientStarter);
 
     auto packageSender = make_shared<PackageSender>(packageQueue, Config::getEventEndpoint());
