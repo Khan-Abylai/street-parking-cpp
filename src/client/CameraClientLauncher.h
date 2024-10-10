@@ -8,7 +8,6 @@
 #include "../ILogger.h"
 #include "../IThreadLauncher.h"
 #include "FrameData.h"
-#include "GstreamerReader.h"
 #include "FrameSnapshotReader.h"
 
 class CameraClientLauncher: public IThreadLauncher, public ILogger{

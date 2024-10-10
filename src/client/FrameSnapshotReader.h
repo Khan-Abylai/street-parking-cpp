@@ -35,7 +35,7 @@ public:
 
 private:
     const int REQUEST_TIMEOUT = 5000;
-    int OVERALL_SECONDS_TO_CHANGE = 120;
+    int OVERALL_SECONDS_TO_CHANGE = 10;
     bool PRESETS_CONFIGURED = false;
 
     std::atomic<bool> shutdownFlag = false;
@@ -44,23 +44,15 @@ private:
     std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>> frameQueue;
 
     std::string cameraIp, username, password;
-    std::string getAllPresetsURL = "/LAPI/V1.0/Channels/0/PTZ/Presets";
     std::string currentTimeUrl = "/LAPI/V1.0/System/Time";
-    std::string presetCtrlURL = "/LAPI/V1.0/Channels/0/PTZ/Presets/<ID>/Goto";
     std::string snapshotUrl = "/LAPI/V1.0/Channels/0/Media/Video/Streams/0/Snapshot";
 
     void fillRequest(cpr::Session &session, const std::string &url, cpr::AuthMode authMode) const;
 
     [[nodiscard]] bool wasRequestSuccessful(const cpr::Response &response) const;
 
-    [[nodiscard]] std::map<std::string, std::string> getAllPresets() const;
-
     [[nodiscard]] cv::Mat snapshotGetter() const;
 
-    bool changeToPreset(const std::string &url);
-
-    std::map<std::string, std::string> presetToPresetURL;
-    std::pair<std::string, std::string> currentPresetInfo;
 
 };
 

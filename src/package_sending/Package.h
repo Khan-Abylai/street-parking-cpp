@@ -13,12 +13,11 @@
 
 class Package: public ITimer{
 public:
-    Package(std::string cameraIp, std::string presetId, std::vector<std::string> licensePlateLabelsParam, cv::Mat carImage, std::vector<std::string> licensePlateBBoxesParam);
+    Package(std::string cameraIp, std::vector<std::string> licensePlateLabelsParam, cv::Mat carImage, std::vector<std::string> licensePlateBBoxesParam);
 
     [[nodiscard]] std::string getPackageJson() const;
 
     [[nodiscard]] const std::string &getCameraIp() const;
-    [[nodiscard]] const std::string &getPresetId() const;
     [[nodiscard]] const std::string &getPlateLabelsRaw() const;
     static std::string convertVectorToRawString(std::vector<std::string> lps);
 
@@ -26,7 +25,7 @@ public:
 private:
     std::vector<std::string> licensePlateLabels, licensePlateBBoxes;
     cv::Mat carImage;
-    std::string cameraIp,presetId, licensePlateLabelsRaw, licensePlateBBoxesRaw;
+    std::string cameraIp, licensePlateLabelsRaw, licensePlateBBoxesRaw;
     time_t eventTime;
 
 };

@@ -36,7 +36,7 @@ void ANPRService::run() {
         auto detectionResult = detection->detect(frame);
         auto endTime = chrono::high_resolution_clock::now();
         double execTime = (double) chrono::duration_cast<chrono::milliseconds>(endTime - startTime).count();
-        LOG_INFO("received frame, size:[%d, %d]. preset: %s. overall found plates %d, exec time [%f ms]", frame.cols, frame.rows, frameData->getPresetID().data(),detectionResult.size(), execTime);
+        LOG_INFO("received frame, size:[%d, %d]. overall found plates %d, exec time [%f ms]", frame.cols, frame.rows, detectionResult.size(), execTime);
 
         if (detectionResult.empty()) continue;
 
@@ -73,7 +73,7 @@ void ANPRService::run() {
             if(!isValid)
                 continue;
             if(DEBUG)
-                LOG_INFO("Preset %s, lp: %s, prob: %f, exec time: %f",  frameData->getPresetID().data(), licensePlateLabel.data(), probability, rec_execTime);
+                LOG_INFO(" lp: %s, prob: %f, exec time: %f",  licensePlateLabel.data(), probability, rec_execTime);
             auto bboxes = convertBoundingBoxToStr(lp);
             licensePlateLabels.emplace_back(licensePlateLabel);
             licensePlateBBoxes.emplace_back(bboxes);
@@ -81,7 +81,7 @@ void ANPRService::run() {
 //        if(DEBUG)
 //            saveImage(frame, frameData->getPresetID(), Utils::dateTimeToStrAnother(time_t(nullptr)), frameData->getIp());
         if(!licensePlateLabels.empty()){
-            createAndPushEventVerification(licensePlateLabels, frameData->getIp(), frameData->getPresetID(), frame, licensePlateBBoxes);
+            createAndPushEventVerification(licensePlateLabels, frameData->getIp(), frame, licensePlateBBoxes);
         }
 
     }
@@ -142,8 +142,8 @@ bool ANPRService::isValidLicensePlate(const string &lpLabel, float probability) 
 
 void
 ANPRService::createAndPushEventVerification(const std::vector<std::string>& licensePlateLabels, const string &cameraIp,
-                                            const string &presetId, const cv::Mat &frame, const std::vector<std::string> &licensePlateBBoxes) {
-    auto package = make_shared<Package>(cameraIp, presetId, licensePlateLabels, frame, licensePlateBBoxes);
+                                            const cv::Mat &frame, const std::vector<std::string> &licensePlateBBoxes) {
+    auto package = make_shared<Package>(cameraIp,  licensePlateLabels, frame, licensePlateBBoxes);
     packageQueue->push(std::move(package));
 }
 

@@ -12,21 +12,10 @@ FrameSnapshotReader::FrameSnapshotReader(const std::string &cameraIP, std::strin
                                          std::string password,
                                          std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>> &frameQueue) :
         ILogger("Camera " + cameraIP), username{std::move(username)}, password{std::move(password)}, cameraIp{cameraIP}, frameQueue{std::move(frameQueue)} {
-    this->getAllPresetsURL = "http://" + cameraIP + this->getAllPresetsURL;
     this->currentTimeUrl = "http://" + cameraIP + this->currentTimeUrl;
     this->snapshotUrl = "http://" + cameraIP + this->snapshotUrl;
 
     auto result = checkCameraAvailability();
-    auto presets = getAllPresets();
-    if (!presets.empty()) {
-        presetToPresetURL = presets;
-        PRESETS_CONFIGURED = true;
-        OVERALL_SECONDS_TO_CHANGE /= (int)presetToPresetURL.size();
-        LOG_INFO("All presets configured, number of presets %d. Interval between checking each preset is %d ",
-                 presetToPresetURL.size(), OVERALL_SECONDS_TO_CHANGE);
-        currentPresetInfo = make_pair(presetToPresetURL.begin()->first, presetToPresetURL.begin()->second);
-        changeToPreset("http://"+cameraIp+currentPresetInfo.second);
-    }
 }
 
 bool FrameSnapshotReader::checkCameraAvailability() {
@@ -80,31 +69,13 @@ bool FrameSnapshotReader::wasRequestSuccessful(const cpr::Response &response) co
 void FrameSnapshotReader::launchStream() {
 
     while (!shutdownFlag) {
-        while (PRESETS_CONFIGURED) {
             unique_lock<mutex> lock(shutdownMutex);
             auto timeout = chrono::seconds(OVERALL_SECONDS_TO_CHANGE);
-
             if (!shutdownEvent.wait_for(lock, timeout, [this] { return shutdownFlag.load(); })) {
                 auto snapshot = snapshotGetter();
                 auto startTime = chrono::high_resolution_clock::now();
-                frameQueue->push(
-                        make_unique<FrameData>(cameraIp,currentPresetInfo.first,
-                                               std::move(snapshot.clone()), startTime));
-
-                auto it = presetToPresetURL.find(currentPresetInfo.first);
-                if(it!= presetToPresetURL.end()){
-                    ++it;
-                    if(it != presetToPresetURL.end())
-                        currentPresetInfo = make_pair(it->first, it->second);
-                    else
-                        currentPresetInfo = make_pair(presetToPresetURL.begin()->first, presetToPresetURL.begin()->second);
-                }else{
-                    currentPresetInfo = make_pair(presetToPresetURL.begin()->first, presetToPresetURL.begin()->second);
-                }
-                auto presetChanged = changeToPreset("http://"+cameraIp + currentPresetInfo.second);
-                LOG_INFO("Signal for changing preset to the %s sent...", currentPresetInfo.first.data());
+                frameQueue->push(make_unique<FrameData>(cameraIp, std::move(snapshot.clone()), startTime));
             }
-        }
     }
 }
 
@@ -113,38 +84,6 @@ void FrameSnapshotReader::shutdown() {
     shutdownFlag = true;
     frameQueue->push(nullptr);
     shutdownEvent.notify_one();
-}
-
-std::map<std::string, std::string> FrameSnapshotReader::getAllPresets() const {
-    cpr::Session session;
-    fillRequest(session, getAllPresetsURL, cpr::AuthMode::DIGEST);
-    auto response = session.Get();
-
-
-    if (!wasRequestSuccessful(response)) {
-        return {};
-    }
-    auto presets = json::parse(response.text)["Response"]["Data"];
-
-    if (presets["Nums"].get<int>() == 0) {
-        LOG_INFO("Number of presets or presets are empty");
-        return {};
-    }
-
-    auto presetNums = presets["Nums"].get<int>();
-    auto presetsInfos = presets["PresetInfos"];
-
-    std::map<std::string, std::string> preset2url;
-
-    for (int i = 0; i < presetNums; ++i) {
-        auto presetInfo = presetsInfos[i];
-        std::string presetID = to_string(presetInfo["ID"].get<int>());
-        auto presetName = presetInfo["Name"].get<string>();
-        auto newPresetUrl(presetCtrlURL);
-        newPresetUrl.replace(newPresetUrl.find("<ID>"), 4, presetID);
-        preset2url.insert(make_pair(presetName, newPresetUrl));
-    }
-    return preset2url;
 }
 
 cv::Mat FrameSnapshotReader::snapshotGetter() const {
@@ -168,11 +107,4 @@ cv::Mat FrameSnapshotReader::snapshotGetter() const {
         return cv::Mat();
     }
     return image;
-}
-
-bool FrameSnapshotReader::changeToPreset(const std::string &url) {
-    cpr::Session putSession;
-    fillRequest(putSession, url, cpr::AuthMode::DIGEST);
-    putSession.SetHeader(cpr::Header{{"Content-Type", "application/json"}});
-    return wasRequestSuccessful(putSession.Put());
 }

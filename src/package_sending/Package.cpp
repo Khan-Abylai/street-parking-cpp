@@ -6,8 +6,8 @@
 
 using namespace std;
 using json = nlohmann::json;
-Package::Package(std::string cameraIp, std::string presetId, std::vector<std::string> licensePlateLabelsParam,
-                 cv::Mat carImage, std::vector<std::string> licensePlateBBoxesParam):cameraIp{std::move(cameraIp)}, presetId{std::move(presetId)},
+Package::Package(std::string cameraIp, std::vector<std::string> licensePlateLabelsParam,
+                 cv::Mat carImage, std::vector<std::string> licensePlateBBoxesParam):cameraIp{std::move(cameraIp)},
                  licensePlateLabels{std::move(licensePlateLabelsParam)}, carImage{std::move(carImage)}, licensePlateBBoxes{std::move(licensePlateBBoxesParam)} {
     eventTime = time_t(nullptr);
     licensePlateLabelsRaw= convertVectorToRawString(licensePlateLabels);
@@ -30,9 +30,6 @@ std::string Package::convertVectorToRawString(std::vector<std::string> lps) {
     return oss.str();
 }
 
-const std::string &Package::getPresetId() const {
-    return presetId;
-}
 
 const std::string &Package::getCameraIp() const {
     return cameraIp;
@@ -41,7 +38,6 @@ const std::string &Package::getCameraIp() const {
 std::string Package::getPackageJson() const {
     json packageJson;
     packageJson["camera_ip"] = cameraIp;
-    packageJson["preset_id"] = presetId;
     packageJson["license_plate_labels"] = convertVectorToRawString(licensePlateLabels);
     packageJson["image"] =  Utils::encodeImgToBase64(carImage);
     packageJson["event_time"] = Utils::dateTimeToStr(eventTime);

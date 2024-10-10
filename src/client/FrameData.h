@@ -11,22 +11,19 @@
 
 class FrameData: public ITimer {
 public:
-    FrameData(std::string ip, std::string presetID, cv::Mat frame,
+    FrameData(std::string ip, cv::Mat frame,
               std::chrono::high_resolution_clock::time_point startTime);
-
-    const std::string &getPresetID();
 
     const std::string &getIp();
 
     const cv::Mat &getFrame();
-
 
     [[nodiscard]] float getFrameWidth() const;
 
     [[nodiscard]] float getFrameHeight() const;
 
 private:
-    std::string ip, presetID;
+    std::string ip;
     cv::Mat frame;
 };
 

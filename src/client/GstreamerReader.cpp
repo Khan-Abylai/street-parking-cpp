@@ -160,7 +160,7 @@ GstFlowReturn GstreamerReader::newDecodedSample(GstAppSink *appSink, gpointer da
 
     if (!currentFrame.empty() && thisPointer->PRESETS_CONFIGURED && thisPointer->READING_FROM_RTSP_ENABLED) {
         thisPointer->frameQueue->push(
-                make_unique<FrameData>(thisPointer->cameraIp, thisPointer->currentPresetInfo.first,
+                make_unique<FrameData>(thisPointer->cameraIp,
                                        std::move(currentFrame.clone()),startTime));
         thisPointer->READING_FROM_RTSP_ENABLED = false;
         auto it = thisPointer->presetToPresetURL.find(thisPointer->currentPresetInfo.first);

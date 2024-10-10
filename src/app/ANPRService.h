@@ -103,7 +103,7 @@ private:
     }
 
     static void saveFrame(const std::shared_ptr<LicensePlate> &plate);
-    void createAndPushEventVerification(const std::vector<std::string>& licensePlateLabels, const std::string &cameraIp, const std::string &presetId, const cv::Mat &frame, const std::vector<std::string> &licensePlateBBoxes);
+    void createAndPushEventVerification(const std::vector<std::string>& licensePlateLabels, const std::string &cameraIp, const cv::Mat &frame, const std::vector<std::string> &licensePlateBBoxes);
     static std::string convertBoundingBoxToStr(const std::shared_ptr<LicensePlate> &licensePlate);
 };
 

@@ -19,7 +19,7 @@ void PackageSender::run() {
         auto package = packageQueue->wait_and_pop();
         if (package == nullptr) continue;
 
-        LOG_INFO("Camera %s, preset %s, plate numbers: %s, event time: %s", package->getCameraIp().data(), package->getPresetId().data(),
+        LOG_INFO("Camera %s plate numbers: %s event time: %s", package->getCameraIp().data(),
                  package->getPlateLabelsRaw().data(), package->getEventTime().data());
         responses.push(sendRequests(package->getPackageJson()));
     }
