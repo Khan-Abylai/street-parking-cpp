@@ -12,7 +12,7 @@ RUN mkdir build && \
     cd build && \
     cmake -D CMAKE_C_COMPILER=gcc-9 -D CMAKE_CXX_COMPILER=g++-9 .. && \
     make -Werror -Wall && \
-    mv cpp-app ../ && \
+    mv streetParking ../ && \
     cd .. && \
     rm -rf src/ build/ CMakeLists.txt
 RUN echo "build prepared"
