@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
     string configFileName;
 
     if (argc <= 1)
-        configFileName = "config.json";
+        configFileName = "config-unv.json";
     else
         configFileName = argv[1];
 
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 
     shared_ptr<IThreadLauncher> clientStarter;
     clientStarter = make_shared<CameraClientLauncher>(cameras, frameQueues,
-                                                      Config::getUsername(), Config::getPassword(), Config::getEventInterval());
+                                                      Config::getUsername(), Config::getPassword(), Config::getEventInterval(), Config::getCameraSnapshotURL(), Config::getCameraTimeUrl());
     services.emplace_back(clientStarter);
 
     auto packageSender = make_shared<PackageSender>(packageQueue, Config::getEventEndpoint());

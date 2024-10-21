@@ -39,6 +39,10 @@ public:
     static const std::string &getKafkaBrokers();
 
     static const std::string &getKafkaTopicName();
+
+    static const std::string &getCameraSnapshotURL();
+
+    static const std::string &getCameraTimeUrl();
 };
 
 

@@ -8,12 +8,13 @@ using namespace std;
 
 CameraClientLauncher::CameraClientLauncher(const std::vector<std::string> &cameras,
                                            std::vector<std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>>> &frameQueues,
-                                           const std::string &username, const std::string &password, int eventInterval )
+                                           const std::string &username, const std::string &password, int eventInterval,
+                                           const std::string &cameraSnapshotUrl, const std::string &cameraTimeUrl)
         : ILogger("Camera Client Launcher ") {
     int index = 0;
     for (
         const auto &camera: cameras) {
-        auto cameraFrameReader = make_shared<FrameSnapshotReader>(camera, username, password,frameQueues[index], eventInterval );
+        auto cameraFrameReader = make_shared<FrameSnapshotReader>(camera, username, password,frameQueues[index], eventInterval, cameraSnapshotUrl, cameraTimeUrl);
 //        auto cameraFrameReader = make_shared<GstreamerReader>(camera, true,frameQueues[index]);
         cameraSnapshotReaders.push_back(std::move(cameraFrameReader));
     }

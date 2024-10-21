@@ -25,7 +25,8 @@ class FrameSnapshotReader:public ILogger {
 
 public:
     FrameSnapshotReader(const std::string &cameraIP, std::string username, std::string password,
-                        std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>>& frameQueue, int eventInterval);
+                        std::shared_ptr<SharedQueue<std::unique_ptr<FrameData>>>& frameQueue, int eventInterval,
+                        const std::string &cameraSnapshotUrl, const std::string &cameraTimeUrl);
 
     void launchStream();
 

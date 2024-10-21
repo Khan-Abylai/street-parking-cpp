@@ -1,0 +1,14 @@
+{
+  "camera_ips": "10.66.69.21",
+  "camera_snapshot_url": "/cgi-bin/snapshot.cgi",
+  "camera_time_url": "/cgi-bin/global.cgi?action=getCurrentTime",
+  "username": "admin",
+  "password": "campas123",
+  "calibration": "http://10.66.100.113:8000/events/get_polygon/",
+  "event": "http://10.66.100.113:8000/events/receive_event/",
+  "detection_threshold": 0.7,
+  "recognition_threshold": 0.7,
+  "event_interval_in_seconds": 1,
+  "brokers": "10.0.11.62:9092,10.0.11.63:9092,10.0.11.64:9092",
+  "topic": "cv-team-test"
+}

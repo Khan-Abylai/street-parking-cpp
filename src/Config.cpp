@@ -21,6 +21,7 @@ std::string kafkaTopicName;
 std::string kafkaBrokersList;
 
 string eventEndpoint, calibrationEndpoint;
+string cameraSnapshotUrl, cameraTimeUrl;
 int eventInterval;
 
 bool Config::parseJson(const std::string &filename) {
@@ -32,6 +33,12 @@ bool Config::parseJson(const std::string &filename) {
         json configs = json::parse(configFile);
         if (configs.find("camera_ips") == configs.end())
             throw runtime_error("Camera IP Entities not defined");
+
+        if (configs.find("camera_snapshot_url") == configs.end())
+            throw runtime_error("Camera Snapshot url not defined");
+
+        if (configs.find("camera_time_url") == configs.end())
+            throw runtime_error("Camera Datetime url not defined");
 
         if (configs.find("calibration") == configs.end())
             throw runtime_error("calibration node not defined");
@@ -48,6 +55,8 @@ bool Config::parseJson(const std::string &filename) {
         cameraVector = Utils::splitString(configs["camera_ips"].get<string>(), ",");
         eventEndpoint = configs["event"].get<string>();
         calibrationEndpoint = configs["calibration"].get<string>();
+        cameraSnapshotUrl = configs["camera_snapshot_url"].get<string>();
+        cameraTimeUrl = configs["camera_time_url"].get<string>();
 
         kafkaTopicName = configs["topic"].get<string>();
         kafkaBrokersList = configs["brokers"].get<string>();
@@ -128,4 +137,12 @@ const std::string &Config::getKafkaBrokers() {
 
 const std::string &Config::getKafkaTopicName() {
     return kafkaTopicName;
+}
+
+const std::string & Config::getCameraSnapshotURL() {
+    return cameraSnapshotUrl;
+}
+
+const std::string & Config::getCameraTimeUrl() {
+    return cameraTimeUrl;
 }
