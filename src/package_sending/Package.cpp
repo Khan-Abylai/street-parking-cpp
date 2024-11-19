@@ -48,25 +48,18 @@ std::vector<std::map<std::string, std::string>> convertToDictList(
     return result;
 }
 
-std::string convertDictToRawString(const std::vector<std::map<std::string, std::string>>& cars) {
-    std::ostringstream oss;
-    json packageJson;
-    oss << "[";
-    for (size_t i = 0; i < cars.size(); ++i) {
-        const auto& car = cars[i];
-        oss << "{";
-        oss << "\"car_number\": \"" << car.at("car_number") << "\" ";
-        // oss << ", ";
-        // oss << "\"lp_rect\": \"" << car.at("lp_rect") << "\" ";
-        oss << "}";
-        if (i < cars.size() - 1) {
-            oss << ", ";
-        }
-    }
-    oss << "]";
-    return oss.str();
-}
+json convertToJson(const std::vector<std::map<std::string, std::string>>& cars) {
+    json jsonCars = json::array();
 
+    for (const auto& car : cars) {
+        json carJson;
+        carJson["car_number"] = car.at("car_number");
+        // carJson["lp_box"] = car.at("lp_box");
+        jsonCars.push_back(carJson);
+    }
+
+    return  jsonCars;
+}
 
 const std::string &Package::getCameraIp() const {
     return cameraIp;
@@ -75,7 +68,7 @@ const std::string &Package::getCameraIp() const {
 std::string Package::getPackageJson() const {
     json packageJson;
     packageJson["ip_address"] = cameraIp;
-    packageJson["cars"] =  convertDictToRawString(convertToDictList(licensePlateLabels, licensePlateBBoxes));
+    packageJson["cars"] = convertToJson(convertToDictList(licensePlateLabels, licensePlateBBoxes));
     packageJson["event_time"] = Utils::dateTimeToStr(eventTime);
     packageJson["picture"] =  Utils::encodeImgToBase64(carImage);
     // packageJson["license_plate_labels"] = convertVectorToRawString(licensePlateLabels);
