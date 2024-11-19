@@ -15,8 +15,8 @@ CameraClientLauncher::CameraClientLauncher(const std::vector<std::string> &camer
     for (
         const auto &camera: cameras) {
         auto cameraFrameReader = make_shared<FrameSnapshotReader>(camera, username, password,frameQueues[index], eventInterval, cameraSnapshotUrl, cameraTimeUrl);
-//        auto cameraFrameReader = make_shared<GstreamerReader>(camera, true,frameQueues[index]);
         cameraSnapshotReaders.push_back(std::move(cameraFrameReader));
+        index++;
     }
 }
 

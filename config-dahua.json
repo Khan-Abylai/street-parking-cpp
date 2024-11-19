@@ -1,5 +1,5 @@
 {
-  "camera_ips": "10.66.69.21",
+  "camera_ips": "10.66.69.21,10.66.69.22",
   "camera_snapshot_url": "/cgi-bin/snapshot.cgi",
   "camera_time_url": "/cgi-bin/global.cgi?action=getCurrentTime",
   "username": "admin",
