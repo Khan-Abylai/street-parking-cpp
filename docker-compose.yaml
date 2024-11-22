@@ -6,11 +6,11 @@ services:
       - TZ=Asia/Almaty
       - NVIDIA_VISIBLE_DEVICES=0
       - CUDA_MODULE_LOADING=LAZY
-    image: registry.infra.smartparking.kz/street-cpp-trt8:v1.0.0
+    image: registry.parqour.com/cv/application/street-parking-cpp:v1.0-malay
     restart: always
     runtime: nvidia
     volumes:
-      - ./config.json:/app/config.json
+      - ./config-unv.json:/app/config-unv.json
     logging:
       options:
         max-size: 50m
