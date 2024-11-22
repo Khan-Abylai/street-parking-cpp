@@ -1,14 +1,14 @@
 {
-  "camera_ips": "10.66.117.40,10.66.69.115",
+  "camera_ips": "10.66.117.40",
   "camera_snapshot_url": "/LAPI/V1.0/Channels/0/Media/Video/Streams/0/Snapshot",
   "camera_time_url": "/LAPI/V1.0/System/Time",
   "username": "admin",
   "password": "campas123.",
-  "calibration": "-",
+  "calibration": "http://10.66.5.25:8888/rest/camera/getCalibrationByIp/",
   "event": "http://10.66.5.25:8888/rest/cars/zoning-event",
   "detection_threshold": 0.5,
-  "recognition_threshold": 0.5,
+  "recognition_threshold": 0.3,
   "event_interval_in_seconds": 15,
-  "brokers": "10.0.11.62:9092,10.0.11.63:9092,10.0.11.64:9092",
-  "topic": "cv-team-test"
+  "brokers": "",
+  "topic": ""
 }
