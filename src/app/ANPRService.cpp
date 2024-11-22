@@ -41,7 +41,7 @@ void ANPRService::run() {
         double execTime = (double) chrono::duration_cast<chrono::milliseconds>(endTime - startTime).count();
         LOG_INFO("received frame, size:[%d, %d]. overall found plates %d, exec time [%f ms]", frame.cols, frame.rows, detectionResult.size(), execTime);
 
-        if (detectionResult.empty()) continue;
+        // if (detectionResult.empty()) continue;
 
         std::vector<std::string> licensePlateLabels;
         std::vector<std::string> licensePlateBBoxes;
@@ -87,12 +87,20 @@ void ANPRService::run() {
             auto bboxes = convertBoundingBoxToStr(lp);
             licensePlateLabels.emplace_back(licensePlateLabel);
             licensePlateBBoxes.emplace_back(bboxes);
+
         }
+
 //        if(DEBUG)
             // saveImage(frame, "1", Utils::dateTimeToStrAnother(time_t(nullptr)), frameData->getIp());
-        if(!licensePlateLabels.empty()){
-            createAndPushEventVerification(licensePlateLabels, frameData->getIp(), frame, licensePlateBBoxes);
-        }
+        // if(!licensePlateLabels.empty()){
+        createAndPushEventVerification(licensePlateLabels, frameData->getIp(), frame, licensePlateBBoxes);
+        // }
+        // else
+        // {
+        //     licensePlateLabels.push_back("");
+        //     licensePlateBBoxes.push_back("");
+        //     createAndPushEventVerification(licensePlateLabels, frameData->getIp(), frame, licensePlateBBoxes);
+        // }
 
     }
 }
@@ -159,14 +167,13 @@ ANPRService::createAndPushEventVerification(const std::vector<std::string>& lice
 }
 
 std::string ANPRService::convertBoundingBoxToStr(const shared_ptr<LicensePlate> &licensePlate) {
-    auto frameSize = licensePlate->getCarImageSize();
-    auto frameWidth = (float) frameSize.width;
-    auto frameHeight = (float) frameSize.height;
-    return Utils::pointToStr(licensePlate->getLeftTop().x / frameWidth,
-                             licensePlate->getLeftTop().y / frameHeight) + ", " +
-           Utils::pointToStr(licensePlate->getLeftBottom().x / frameWidth,
-                             licensePlate->getLeftBottom().y / frameHeight) + ", " +
-           Utils::pointToStr(licensePlate->getRightTop().x / frameWidth,
-                             licensePlate->getRightTop().y / frameHeight) + ", " +
-           Utils::pointToStr(licensePlate->getRightBottom().x / frameWidth,
-                             licensePlate->getRightBottom().y / frameHeight);}
+    return Utils::pointToStr(licensePlate->getLeftTop().x,
+                             licensePlate->getLeftTop().y) + "," +
+           Utils::pointToStr(licensePlate->getRightTop().x,
+                             licensePlate->getRightTop().y) + "," +
+           Utils::pointToStr(licensePlate->getRightBottom().x,
+                             licensePlate->getRightBottom().y) + "," +
+           Utils::pointToStr(licensePlate->getLeftBottom().x,
+                             licensePlate->getLeftBottom().y);
+}
+

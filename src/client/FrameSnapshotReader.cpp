@@ -97,7 +97,8 @@ cv::Mat FrameSnapshotReader::snapshotGetter() const {
     auto response = session.Get();
     if (response.elapsed >= REQUEST_TIMEOUT / 1000 || response.status_code == 0 || response.status_code == 401) {
         LOG_ERROR("Problem with getting snapshot from camera");
-        return cv::Mat();
+        cv::Mat blackImage(1080, 1920, CV_8UC3, cv::Scalar(0, 0, 0));
+        return blackImage;
     }
 
     std::vector<uchar> data(response.text.begin(), response.text.end());
@@ -105,7 +106,8 @@ cv::Mat FrameSnapshotReader::snapshotGetter() const {
 
     if (image.empty()) {
         LOG_ERROR("Failed to decode image from response" );
-        return cv::Mat();
+        cv::Mat blackImage(1080, 1920, CV_8UC3, cv::Scalar(0, 0, 0));
+        return blackImage;
     }
     return image;
 }
