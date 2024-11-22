@@ -1,6 +1,6 @@
 image_base=registry.infra.smartparking.kz/cpp-base:1.0
-image=registry.infra.smartparking.kz/street-cpp-trt8
-tag=v1.0.0
+image=registry.parqour.com/cv/application/street-parking-cpp
+tag=v1.0-malay
 dev_tag=dev
 engine_builder_tag=${tag}-engine
 container_name=test
