@@ -64,7 +64,7 @@ string Utils::dateTimeToStr(time_t dateTime) {
 }
 
 string Utils::pointToStr(float x, float y) {
-    return to_string(x) + ", " + to_string(y);
+    return to_string(int(x)) + "," + to_string(int(y));
 }
 
 vector<string> Utils::splitString(const string &str, const string &delimiter) {

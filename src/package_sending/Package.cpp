@@ -54,7 +54,7 @@ json convertToJson(const std::vector<std::map<std::string, std::string>>& cars) 
     for (const auto& car : cars) {
         json carJson;
         carJson["car_number"] = car.at("car_number");
-        // carJson["lp_box"] = car.at("lp_box");
+        carJson["lp_rect"] = car.at("lp_rect");
         jsonCars.push_back(carJson);
     }
 
