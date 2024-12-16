@@ -39,7 +39,14 @@ void LicensePlate::setFakePlateImage(const cv::Mat &frame) {
     cv::warpPerspective(frame, fakePlateImage, transformationMatrix, lpSize);
 }
 
-
+void LicensePlate::move(int dx, int dy) {
+    center.x += dx;
+    center.y += dy;
+    leftTop.x += dx; leftTop.y += dy;
+    rightBottom.x += dx; rightBottom.y += dy;
+    leftBottom.x += dx; leftBottom.y += dy;
+    rightTop.x += dx; rightTop.y += dy;
+}
 
 void LicensePlate::setPlateImage(const cv::Mat &frame) {
 
@@ -116,11 +123,11 @@ const string &LicensePlate::getPlateLabel() const {
 }
 
 void LicensePlate::setLicensePlateLabel(string lpLabel) {
-    licensePlateLabel = move(lpLabel);
+    licensePlateLabel = std::move(lpLabel);
 }
 
 void LicensePlate::setCameraIp(string ip) {
-    cameraIp = move(ip);
+    cameraIp = std::move(ip);
 }
 
 const string &LicensePlate::getCameraIp() const {
@@ -128,7 +135,7 @@ const string &LicensePlate::getCameraIp() const {
 }
 
 void LicensePlate::setCarImage(cv::Mat image) {
-    carImage = move(image);
+    carImage = std::move(image);
 }
 
 const cv::Mat &LicensePlate::getCarImage() const {

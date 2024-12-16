@@ -88,6 +88,8 @@ add_executable(streetParking
         src/app/LPRecognizerExtended.cpp
         src/app/LPRecognizerExtended.h
         src/app/TensorRTEngine.cpp
+        src/app/Slicing.cpp
+        src/app/Slicing.h
 )
 
 set(MODELS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/models")

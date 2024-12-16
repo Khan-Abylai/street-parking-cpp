@@ -88,16 +88,102 @@ Detection::getLicensePlates(vector<float> lpPredictions, int frameWidth, int fra
     return std::move(licensePlatesWithProbs);
 }
 
-vector<shared_ptr<LicensePlate>> Detection::detect(const cv::Mat &frame) {
+std::vector<std::shared_ptr<LicensePlate>> Detection::detect(
+    const cv::Mat &frame,
+    int numSlices,
+    float paddingRatio,
+    float iou_thr,
+    float skip_box_thr
+) {
+    Slicing slicer(numSlices, paddingRatio);
+    auto slices = slicer.sliceImage(frame);
+    int originalW = frame.cols;
+    int originalH = frame.rows;
 
-    auto lpPredictions = executeEngine(frame);
+    std::vector<std::vector<std::array<float,4>>> boxes_list;
+    std::vector<std::vector<float>> scores_list;
 
-    if (lpPredictions.empty()) return vector<shared_ptr<LicensePlate>>{};
+    for (auto &sl : slices) {
+        cv::Mat crop;
+        int x_start, y_start;
+        std::tie(crop, x_start, y_start) = sl;
 
-    vector<tuple<float, shared_ptr<LicensePlate>>> licensePlatesWithProbs = getLicensePlates(std::move(lpPredictions),
-                                                                                             frame.cols, frame.rows);
-    sort(licensePlatesWithProbs.begin(), licensePlatesWithProbs.end(), greater<>());
-    return nms(licensePlatesWithProbs);
+        auto lpPredictions = executeEngine(crop);
+        if (lpPredictions.empty()) {
+            boxes_list.push_back({});
+            scores_list.push_back({});
+            continue;
+        }
+
+        auto platesWithProb = getLicensePlates(std::move(lpPredictions), crop.cols, crop.rows);
+
+        std::vector<std::array<float,4>> norm_boxes;
+        std::vector<float> slice_scores;
+
+        for (auto &p : platesWithProb) {
+            float prob;
+            std::shared_ptr<LicensePlate> lp;
+            std::tie(prob, lp) = p;
+
+            lp->move(x_start, y_start);
+
+            float x_min = lp->getLeftTop().x / (float)originalW;
+            float y_min = lp->getLeftTop().y / (float)originalH;
+            float x_max = lp->getRightBottom().x / (float)originalW;
+            float y_max = lp->getRightBottom().y / (float)originalH;
+
+            x_min = std::max(0.0f, std::min(1.0f, x_min));
+            y_min = std::max(0.0f, std::min(1.0f, y_min));
+            x_max = std::max(0.0f, std::min(1.0f, x_max));
+            y_max = std::max(0.0f, std::min(1.0f, y_max));
+
+            norm_boxes.push_back({x_min, y_min, x_max, y_max});
+            slice_scores.push_back(prob);
+        }
+
+        boxes_list.push_back(norm_boxes);
+        scores_list.push_back(slice_scores);
+    }
+
+    auto [wbf_boxes, wbf_scores] = Slicing::applyWBF(boxes_list, scores_list, iou_thr, skip_box_thr);
+
+    std::vector<std::shared_ptr<LicensePlate>> finalPlates;
+    for (size_t i = 0; i < wbf_boxes.size(); i++) {
+        float x_min = wbf_boxes[i][0] * originalW;
+        float y_min = wbf_boxes[i][1] * originalH;
+        float x_max = wbf_boxes[i][2] * originalW;
+        float y_max = wbf_boxes[i][3] * originalH;
+
+        int cx = static_cast<int>((x_min + x_max) / 2);
+        int cy = static_cast<int>((y_min + y_max) / 2);
+        float width = (x_max - x_min);
+        float height = (y_max - y_min);
+
+        auto lp = std::make_shared<LicensePlate>(
+            cx, cy, width, height,
+            static_cast<int>(std::floor(x_min)), static_cast<int>(std::floor(y_min)),
+            static_cast<int>(std::floor(x_min)), static_cast<int>(std::ceil(y_max)),
+            static_cast<int>(std::ceil(x_max)), static_cast<int>(std::floor(y_min)),
+            static_cast<int>(std::ceil(x_max)), static_cast<int>(std::ceil(y_max)),
+            wbf_scores[i]
+        );
+
+        finalPlates.push_back(lp);
+    }
+
+    // if(DEBUG) {
+    //     cv::Mat debugImg = frame.clone();
+    //     for (auto &lp : finalPlates) {
+    //         cv::Point2f lt = lp->getLeftTop();
+    //         cv::Point2f rb = lp->getRightBottom();
+    //         cv::rectangle(debugImg, cv::Rect(lt.x, lt.y, rb.x - lt.x, rb.y - lt.y), cv::Scalar(0,0,255), 2);
+    //     }
+    //
+    //     cv::imwrite("../test/final_result.jpg", debugImg);
+    //     std::cout << "Final result image saved as final_result.jpg\n";
+    // }
+
+    return finalPlates;
 }
 
 vector<shared_ptr<LicensePlate>> Detection::nms(const vector<tuple<float, shared_ptr<LicensePlate>>> &licensePlates) const {

@@ -34,6 +34,8 @@ public:
 
     [[nodiscard]] const cv::Mat &getPlateImage() const;
 
+    void move(int dx, int dy);
+
     void setPlateImage(const cv::Mat &frame);
 
     void setFakePlateImage(const cv::Mat &frame);

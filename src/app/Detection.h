@@ -14,12 +14,23 @@
 #include "TensorRTDeleter.h"
 #include "../ILogger.h"
 
+#include "Slicing.h"
+#include <algorithm>
+#include <cmath>
+
 class Detection : public ::ILogger {
 public:
 
     Detection(nvinfer1::IExecutionContext *executionContext, const float &detectionThreshold);
 
-    std::vector<std::shared_ptr<LicensePlate>> detect(const cv::Mat &frame);
+    std::vector<std::shared_ptr<LicensePlate>> detect(
+        const cv::Mat &frame,       // Входное изображение, которое необходимо обработать (обычно кадр с камеры или видео).
+        int numSlices = 4,          // Количество частей, на которые будет разделено изображение (горизонтально и вертикально).
+        float paddingRatio = 0.15f, // Доля padding (отступа) относительно размеров каждого среза.
+        float iou_thr = 0.2f,       // Пороговое значение IoU (Intersection over Union) для объединения пересекающихся боксов.
+        float skip_box_thr = 0.5f   // Минимальный порог вероятности для фильтрации боксов с низкой уверенностью.
+    );
+
 
     ~Detection();
 
