@@ -6,7 +6,7 @@ services:
       - TZ=Asia/Almaty
       - NVIDIA_VISIBLE_DEVICES=0
       - CUDA_MODULE_LOADING=LAZY
-    image: registry.parqour.com/cv/application/street-parking-cpp:v1.0-malay
+    image: registry.parqour.com/cv/application/street-parking-cpp:v1.1-malay
     restart: always
     runtime: nvidia
     volumes:
