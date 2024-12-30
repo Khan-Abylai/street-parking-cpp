@@ -22,6 +22,19 @@ void PackageSender::run() {
         LOG_INFO("Camera %s plate numbers: %s event time: %s", package->getCameraIp().data(),
                  package->getPlateLabelsRaw().data(), package->getEventTime().data());
         responses.push(sendRequests(package->getPackageJson()));
+
+        while (!responses.empty()) {
+            auto& asyncResponse = responses.front();
+            try {
+                if (asyncResponse.get().status_code != 0) {
+                    responses.pop();
+                } else {
+                    break;
+                }
+            } catch (const std::exception &e) {
+                responses.pop();
+            }
+        }
     }
 }
 

@@ -96,7 +96,7 @@ std::vector<std::shared_ptr<LicensePlate>> Detection::detect(
     float skip_box_thr
 ) {
     Slicing slicer(numSlices, paddingRatio);
-    auto slices = slicer.sliceImage(frame);
+    auto slices = slicer.sliceImage(std::move(frame));
     int originalW = frame.cols;
     int originalH = frame.rows;
 
@@ -108,7 +108,7 @@ std::vector<std::shared_ptr<LicensePlate>> Detection::detect(
         int x_start, y_start;
         std::tie(crop, x_start, y_start) = sl;
 
-        auto lpPredictions = executeEngine(crop);
+        auto lpPredictions = executeEngine(std::move(crop));
         if (lpPredictions.empty()) {
             boxes_list.push_back({});
             scores_list.push_back({});
@@ -141,11 +141,11 @@ std::vector<std::shared_ptr<LicensePlate>> Detection::detect(
             slice_scores.push_back(prob);
         }
 
-        boxes_list.push_back(norm_boxes);
-        scores_list.push_back(slice_scores);
+        boxes_list.push_back(std::move(norm_boxes));
+        scores_list.push_back(std::move(slice_scores));
     }
 
-    auto [wbf_boxes, wbf_scores] = Slicing::applyWBF(boxes_list, scores_list, iou_thr, skip_box_thr);
+    auto [wbf_boxes, wbf_scores] = Slicing::applyWBF(std::move(boxes_list), std::move(scores_list), iou_thr, skip_box_thr);
 
     std::vector<std::shared_ptr<LicensePlate>> finalPlates;
     for (size_t i = 0; i < wbf_boxes.size(); i++) {
@@ -183,7 +183,7 @@ std::vector<std::shared_ptr<LicensePlate>> Detection::detect(
     //     std::cout << "Final result image saved as final_result.jpg\n";
     // }
 
-    return finalPlates;
+    return std::move(finalPlates);
 }
 
 vector<shared_ptr<LicensePlate>> Detection::nms(const vector<tuple<float, shared_ptr<LicensePlate>>> &licensePlates) const {

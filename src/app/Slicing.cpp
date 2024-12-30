@@ -33,12 +33,12 @@ std::vector<std::tuple<cv::Mat,int,int>> Slicing::sliceImage(const cv::Mat &img)
             int x_end = std::min(w, x + sliceW + paddingW);
             int y_end = std::min(h, y + sliceH + paddingH);
 
-            cv::Mat crop = img(cv::Rect(x_start, y_start, x_end - x_start, y_end - y_start)).clone();
-            slices.push_back({crop, x_start, y_start});
+            cv::Mat crop = img(cv::Rect(x_start, y_start, x_end - x_start, y_end - y_start));
+            slices.push_back(std::make_tuple(std::move(crop), x_start, y_start));;
 
-            cv::Mat originalClip = img(cv::Rect(x_raw_start, y_raw_start,
-                                                x_raw_end - x_raw_start, y_raw_end - y_raw_start)).clone();
-
+            //cv::Mat originalClip = img(cv::Rect(x_raw_start, y_raw_start,
+            //                                    x_raw_end - x_raw_start, y_raw_end - y_raw_start));
+            //
             // if(DEBUG) {
             //     cv::imwrite("../test/slice_original" + std::to_string(count) + ".jpg", originalClip);
             //     cv::imwrite("../test/slice_padded" + std::to_string(count) + ".jpg", crop);
@@ -47,7 +47,7 @@ std::vector<std::tuple<cv::Mat,int,int>> Slicing::sliceImage(const cv::Mat &img)
         }
     }
 
-    return slices;
+    return std::move(slices);
 }
 
 float Slicing::iou(const std::array<float,4> &a, const std::array<float,4> &b) {
@@ -82,7 +82,7 @@ Slicing::weightedBoxesFusion(const std::vector<std::vector<std::array<float,4>>>
         for (size_t j = 0; j < boxes_list[i].size(); j++) {
             float sc = scores_list[i][j];
             if (sc >= skip_box_thr) {
-                all_boxes.push_back(boxes_list[i][j]);
+                all_boxes.push_back(std::move(boxes_list[i][j]));
                 all_scores.push_back(sc);
             }
         }
@@ -109,7 +109,7 @@ Slicing::weightedBoxesFusion(const std::vector<std::vector<std::array<float,4>>>
         std::vector<std::array<float,4>> cluster_boxes;
         std::vector<float> cluster_scores;
 
-        cluster_boxes.push_back(all_boxes[i_box_index]);
+        cluster_boxes.push_back(std::move(all_boxes[i_box_index]));
         cluster_scores.push_back(all_scores[i_box_index]);
         used[i_box_index] = true;
 
@@ -119,7 +119,7 @@ Slicing::weightedBoxesFusion(const std::vector<std::vector<std::array<float,4>>>
 
             float current_iou = iou(all_boxes[i_box_index], all_boxes[j_box_index]);
             if (current_iou > iou_thr) {
-                cluster_boxes.push_back(all_boxes[j_box_index]);
+                cluster_boxes.push_back(std::move(all_boxes[j_box_index]));
                 cluster_scores.push_back(all_scores[j_box_index]);
                 used[j_box_index] = true;
             }
@@ -147,7 +147,7 @@ Slicing::weightedBoxesFusion(const std::vector<std::vector<std::array<float,4>>>
         fused_scores.push_back(fused_score);
     }
 
-    return {fused_boxes, fused_scores};
+    return {std::move(fused_boxes), std::move(fused_scores)};
 }
 
 std::tuple<std::vector<std::array<float,4>>, std::vector<float>>
@@ -155,5 +155,5 @@ Slicing::applyWBF(const std::vector<std::vector<std::array<float,4>>> &boxes_lis
                   const std::vector<std::vector<float>> &scores_list,
                   float iou_thr,
                   float skip_box_thr) {
-    return weightedBoxesFusion(boxes_list, scores_list, iou_thr, skip_box_thr);
+    return weightedBoxesFusion(std::move(boxes_list), std::move(scores_list), iou_thr, skip_box_thr);
 }
